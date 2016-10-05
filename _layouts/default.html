@@ -1,0 +1,70 @@
+---
+layout: core
+---
+    <div class="page-wrapper">
+        <header id="header" class="header">
+            <div class="container clearfix"><div class="pull-left">
+                <div class="branding">
+                    <h1 class="logo">
+                        <a href="{{ site.baseurl }}">
+                            <span class="text-highlight">{% if layout.title %}{{ layout.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</span> <span class="text-bold">{% if page.maintitle %}{{ page.maintitle | escape }}{% elsif layout.maintitle %}{{ layout.maintitle | escape }}{% else %}{{ site.maintitle | escape }}{% endif %}</span>
+                        </a>
+                    </h1>
+                </div>
+                <ol class="breadcrumb">
+{% capture html %}
+{% capture page_url_without_index_html %}{{ page.url | remove: "/index.html" }}{% endcapture %}
+{% assign splitted_url_parts = page_url_without_index_html | split: '/' %}
+{% capture forLoopMaxInt %}{{ splitted_url_parts.size | minus:1 }}{% endcapture %}
+{% for i in (1..forLoopMaxInt) %}
+    {% capture current_breadcrumb_url %}{{next_prepender}}/{{ splitted_url_parts[i] }}/index.html{% endcapture %}
+    {% capture current_breadcrumb_md_url %}{{next_prepender}}/{{ splitted_url_parts[i] }}/{% endcapture %}
+    {% capture next_prepender %}{{next_prepender}}/{{ splitted_url_parts[i] }}{% endcapture %}
+    {% for breadcrumb_page in site.pages %}
+        {% if current_breadcrumb_url == breadcrumb_page.url or current_breadcrumb_md_url == breadcrumb_page.url  %}
+        {% assign j = forLoopMaxInt | plus: 0 %}
+            <li {% if i == j %}class="active"{% endif %}>
+                {% capture breadcrumb_page_page_url_without_index_html %}{{ breadcrumb_page.url | remove: "index.html" }}{% endcapture %}
+                <a href="{{ site.baseurl }}{{breadcrumb_page_page_url_without_index_html}}">{{breadcrumb_page.breadcrumb}}</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}
+                </ol></div>
+{% if layout.title == "watched" %}
+<div class="pull-right">
+<nav id="navbar" class="navbar">
+ <ul class="nav navbar-nav navbar-right">
+     <li><a href="/watched/">Home</a></li>
+     <li><a href="/watched/about/">About</a></li>
+<li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Documentation <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/watched/doc/">index</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/watched/doc/agent/">Agent</a></li>
+            <li><a href="/watched/doc/backend/">Backend</a></li>
+            <li><a href="/watched/doc/frontend/">Frontend</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/watched/doc/install/">Installation</a></li>
+          </ul>
+        </li>
+        <li><a href="/watched/download">Download</a></li>
+ </ul>
+</nav>
+</div>
+{% endif %}
+            </div>
+        </header>
+        <div class="doc-wrapper">
+
+{{ content }}
+
+        </div>
+    </div>
+    <footer id="footer" class="footer text-center">
+        <div class="container">
+            <small class="copyright">Copyright <a href="https://sebt3.github.io/" targe="_blank">Sebastien Huss</a> 2016</small>
+        </div>
+    </footer>

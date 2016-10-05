@@ -1,0 +1,69 @@
+---
+layout: watched_docs
+breadcrumb: backend
+title: Watched Documentation
+doc_title: the backend
+doc_icon: fa-database
+
+---
+
+<section class="doc-section">
+ <h2 class="section-title">Description</h2>
+ <div class="section-block">
+  <p>This is the backend. It collect all the performance metrics from the agents. It monitor the metrics, store the data in a mysql database and compute aggregates.</p>
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Installation</h2>
+ <div class="section-block">
+  <p>see the <a href="/watched/doc/install/#build-the-backend">installation guide</a></p>
+ </div>
+</section>
+
+<!--<section class="doc-section">
+ <h2 class="section-title">The aggregation process</h2>
+ <div class="section-block">
+  <p></p>
+ </div>
+</section>-->
+
+<section class="doc-section">
+ <h2 class="section-title">The configuration file</h2>
+ <div class="section-block">
+  <p></p>
+  <pre class="code"><span class="prompt">$</span> vi central.config.json</pre>
+  <pre><code class="language-json">{
+        /*      Configure the data aggregate process */
+        "aggregate" : 
+        {
+                "ah_retention" : 1826, /*       Number of days the hours aggregates are kept (default: 5 years) */
+                "am_retention" : 120, /*        Number of days the minuts aggregates are kept (default: 4 months)*/
+                "h_delay" : 2, /*               Delay before the data is aggregated in hours */
+                "m_delay" : 30, /*              Delay before the data is aggregated in minutes */
+                "retention" : 30 /*             Number of days the raw data is being kept (default: 1 month) */
+        },
+        /*      MySQL database informations */
+        "db" : 
+        {
+                "connection_string" : "localhost:3306", /*   MySQL database connection string */
+                "database_name" : "watcheddb", /*            MySQL database name */
+                "login" : "watched", /*                      MySQL login */
+                "password" : "watched", /*                   MySQL password */
+                "pool_size" : 32 /*                          Number of concurrent connections to the database */
+        }
+}</code></pre>
+  <p>For now the backend doesnt check for changes in its configuration file, so after each edit you'll need to restart it.</p>
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Configuring the agents</h2>
+ <div class="section-block">
+  <p>Until the frontend offer a better option, adding an agent is just a matter of inserting a line in the database.</p>
+  <pre class="code"><span class="prompt">$</span> mysql -u watched -D watcheddb -p</pre>
+  <pre><code class="language-sql">insert into agents(host,port) values('localhost',9080);
+commit;</code></pre>
+  <p>For now the backend doesnt check for changes in this table, so after each insert (or delete) you'll need to restart it.</p>
+ </div>
+</section>

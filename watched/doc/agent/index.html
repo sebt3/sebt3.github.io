@@ -1,0 +1,105 @@
+---
+layout: watched_docs
+breadcrumb: agent
+title: Watched Documentation
+doc_title: the agent
+doc_icon: fa-binoculars
+
+---
+
+<section class="doc-section">
+ <h2 class="section-title">Description</h2>
+ <div class="section-block">
+  <p>The plugin-based agent written in c++. It provide a REST api to the data that the backend consume.</p>
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Installation</h2>
+ <div class="section-block">
+  <p>see the <a href="/watched/doc/install/#build-the-agent">installation guide</a></p>
+ </div>
+</section>
+
+<!--<section class="doc-section">
+ <h2 class="section-title">The plugins</h2>
+ <div class="section-block">
+  <p></p>
+ </div>
+</section>-->
+
+<section class="doc-section">
+ <h2 class="section-title">The configuration file</h2>
+ <div class="section-block">
+  <p></p>
+  <pre class="code"><span class="prompt">$</span> vi agent.config.json</pre>
+  <pre><code class="language-json">{
+        /*      Configure the collectors plugins */
+        "collectors" : 
+        {
+                "cpuload" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 150, /*             Number of elements to keep*/
+                        "poll-frequency" : 10 /*        Number of seconds between snapshots*/
+                },
+                "cpuspeed" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 300, /*             Number of elements to keep*/
+                        "poll-frequency" : 5 /*         Number of seconds between snapshots*/
+                },
+                "cpuuse" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 300, /*             Number of elements to keep*/
+                        "poll-frequency" : 5 /*         Number of seconds between snapshots*/
+                },
+                "diskstats" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 300, /*             Number of elements to keep*/
+                        "poll-frequency" : 5 /*         Number of seconds between snapshots*/
+                },
+                "diskusage" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 100, /*             Number of elements to keep*/
+                        "poll-frequency" : 300 /*       Number of seconds between snapshots*/
+                },
+                "memory" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 150, /*             Number of elements to keep*/
+                        "poll-frequency" : 10 /*        Number of seconds between snapshots*/
+                },
+                "netdev" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 300, /*             Number of elements to keep*/
+                        "poll-frequency" : 5 /*         Number of seconds between snapshots*/
+                },
+                "uptime" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 100, /*             Number of elements to keep*/
+                        "poll-frequency" : 300 /*       Number of seconds between snapshots*/
+                },
+                "vmstat" : 
+                {
+                        "enable" : true, /*             Enable this plugin ?*/
+                        "history" : 300, /*             Number of elements to keep*/
+                        "poll-frequency" : 5 /*         Number of seconds between snapshots*/
+                }
+        },
+        "server" : 
+        {
+                "collectors_dir" : "plugins",
+                "host" : "", /*         Host string to listen on (default: all interfaces) */
+                "port" : 9080, /*               TCP port number */
+                "threads" : 8 /*                Number of concurrent threads use to reply on network interface */
+        }
+}</code></pre>
+  <p>For now the agent doesnt check for changes in its configuration file, so after each edit you'll need to restart it.</p>
+ </div>
+</section>

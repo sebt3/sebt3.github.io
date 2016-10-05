@@ -1,0 +1,20 @@
+{% capture html %}
+<ul>
+    {% assign entries = site.pages | sort: "path" %}
+    {% for entry in entries %}
+        {% if entry.menu %}
+
+        {% capture slug    %}{{ entry.url | split: "/"   | last                       }}{% endcapture %}
+        {% capture current %}{{ entry.url | remove: slug | remove: "//" | append: "/" }}{% endcapture %}
+
+        {% if current == include.context %}
+            <li class="{% if page.url contains entry.url %}active{% endif %}">
+                <a href="{{ site.baseurl }}{{ entry.url }}">{{ entry.menu }}</a>
+                {% include navigation.html context=entry.url %}
+            </li>
+        {% endif %}
+        {% endif %}
+
+    {% endfor %}
+</ul>
+{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}
