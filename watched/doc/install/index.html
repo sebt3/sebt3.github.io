@@ -25,6 +25,8 @@ doc_icon: fa-download
    </ul>
    </li>
   </ul>
+  <p>On a redhat-based system :</p>
+  <pre class="code"><span class="prompt">#</span> yum install boost-devel jsoncpp-devel openssl-devel</pre>
   <p>On a debian-based system :</p>
   <pre class="code"><span class="prompt">#</span> aptitude install libssl-dev libjsoncpp-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-system-dev libboost-thread-dev</pre>
   <p>then build using cmake :</p>
@@ -144,6 +146,8 @@ commit;</code></pre>
    </ul>
    </li>
   </ul>
+  <p>On a redhat-based system :</p>
+  <pre class="code"><span class="prompt">#</span> yum install boost-devel jsoncpp-devel openssl-devel mysql++-devel</pre>
   <p>On a debian-based system :</p>
   <pre class="code"><span class="prompt">#</span> aptitude install libmysql++-dev libssl-dev libjsoncpp-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-system-dev libboost-thread-dev</pre>
   <p>then build using cmake :</p>
@@ -152,7 +156,7 @@ commit;</code></pre>
 <span class="prompt">watched.back$</span> cd build
 <span class="prompt">watched.back/build$</span> cmake ..
 <span class="prompt">watched.back/build$</span> make</pre>
-  <p>Finally, start the backend :</p>
+  <p>Then, start the backend :</p>
   <pre class="code"><span class="prompt">watched.back/build$</span> ./watched.back</pre>
   <p>The backend will probably fail to connect to the database, but it will have generated a default configuration file for you.</p>
   <p>Edit the newly configuration file to setup database connection :</p>
@@ -169,7 +173,8 @@ commit;</code></pre>
         },
 ...
 }</code></pre>
-
+  <p>Finally, restart the backend :</p>
+  <pre class="code"><span class="prompt">watched.back/build$</span> ./watched.back</pre>
  </div>
 </section>
 
@@ -178,7 +183,16 @@ commit;</code></pre>
  <div class="section-block">
   <p>if you havent already clone the repository :</p>
   <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.front.git</pre>
-  <p>Get the dependencies :</p>
+  <p>Get the initial dependency :</p>
+  <ul>
+   <li><a href="https://getcomposer.org/">composer</a></li>
+   </li>
+  </ul>
+  <p>On a redhat-based system :</p>
+  <pre class="code"><span class="prompt">#</span> yum install php composer</pre>
+  <p>On a debian-based system :</p>
+  <pre class="code"><span class="prompt">#</span> aptitude install composer</pre>
+  <p>Then get the other dependencies :</p>
   <pre class="code"><span class="prompt">$</span> cd watched.front
 <span class="prompt">watched.front$</span> composer install</pre>
   <p>Edit the configuration file to setup the database :</p>
