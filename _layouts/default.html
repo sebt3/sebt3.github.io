@@ -1,6 +1,7 @@
 ---
 layout: core
 ---
+{% capture html %}
     <div class="page-wrapper">
         <header id="header" class="header">
             <div class="container clearfix"><div class="pull-left">
@@ -12,7 +13,6 @@ layout: core
                     </h1>
                 </div>
                 <ol class="breadcrumb">
-{% capture html %}
 {% capture page_url_without_index_html %}{{ page.url | remove: "/index.html" }}{% endcapture %}
 {% assign splitted_url_parts = page_url_without_index_html | split: '/' %}
 {% capture forLoopMaxInt %}{{ splitted_url_parts.size | minus:1 }}{% endcapture %}
@@ -30,7 +30,6 @@ layout: core
         {% endif %}
     {% endfor %}
 {% endfor %}
-{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}
                 </ol></div>
 {% if layout.title == "watched" %}
 <div class="pull-right">
@@ -58,9 +57,9 @@ layout: core
             </div>
         </header>
         <div class="doc-wrapper">
-
+{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}
 {{ content }}
-
+{% capture html %}
         </div>
     </div>
     <footer id="footer" class="footer text-center">
@@ -68,3 +67,4 @@ layout: core
             <small class="copyright">Copyright <a href="https://sebt3.github.io/" targe="_blank">Sebastien Huss</a> 2016</small>
         </div>
     </footer>
+{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}

@@ -2,6 +2,7 @@
 layout: watched_default
 maintitle: Documentation
 ---
+{% capture html %}
             <div class="container">
                 <div id="doc-header" class="doc-header text-center">
                     <h1 class="doc-title"><i class="icon fa {{ page.doc_icon }}"></i> {{ page.doc_title }}</h1>
@@ -9,7 +10,9 @@ maintitle: Documentation
                 <div class="doc-body">
                     <div class="doc-content">
                         <div class="content-inner">
+{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}
 {{ content }}
+{% capture html %}
                         </div><!--//content-inner-->
                     </div><!--//doc-content-->
                     <div class="doc-sidebar hidden-xs" id="doc-menu">
@@ -17,3 +20,4 @@ maintitle: Documentation
                     </div><!--//doc-sidebar-->
                 </div>
             </div><!--//container-->
+{% endcapture %}{{ html | strip_newlines | replace:'    ','' | replace:'    ','' | replace:'  ',' ' }}
