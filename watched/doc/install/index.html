@@ -7,11 +7,9 @@ doc_icon: fa-download
 ---
 
 <section class="doc-section">
- <h2 class="section-title">Build the agent</h2>
+ <h2 class="section-title">The agent</h2>
  <div class="section-block">
-  <p>if you havent already clone the repository :</p>
-  <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.agent.git</pre>
-  <p>Install the dependencies:</p>
+  <h3>Install the dependencies</h3>
   <ul>
    <li><a href="https://www.openssl.org/">openssl</a></li>
    <li><a href="https://github.com/open-source-parsers/jsoncpp">jsoncpp</a></li>
@@ -29,109 +27,28 @@ doc_icon: fa-download
   <pre class="code"><span class="prompt">#</span> yum install boost-devel jsoncpp-devel openssl-devel</pre>
   <p>On a debian-based system :</p>
   <pre class="code"><span class="prompt">#</span> aptitude install libssl-dev libjsoncpp-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-system-dev libboost-thread-dev</pre>
+  <h3>Build and install the agent</h3>
+  <p>if you havent already clone the repository :</p>
+  <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.agent.git
+<span class="prompt">$</span> cd watched.agent</pre>
   <p>then build using cmake :</p>
-  <pre class="code"><span class="prompt">$</span> cd watched.agent
-<span class="prompt">watched.agent$</span> mkdir build
+  <pre class="code"><span class="prompt">watched.agent$</span> mkdir build
 <span class="prompt">watched.agent$</span> cd build
 <span class="prompt">watched.agent/build$</span> cmake ..
-<span class="prompt">watched.agent/build$</span> make</pre>
+<span class="prompt">watched.agent/build$</span> make
+<span class="prompt">watched.agent/build$</span> sudo make install</pre>
+  <p>Alternatively, on Debian :</p>
+  <pre class="code"><span class="prompt">watched.agent$</span> dpkg-buildpackage
+<span class="prompt">watched.agent$</span> sudo dpkg -i ../watched.agent_*.deb</pre>
   <p>Finally, start the agent :</p>
-  <pre class="code"><span class="prompt">watched.agent/build$</span> ./watched.agent</pre>
+  <pre class="code"><span class="prompt">watched.agent/build$</span> sudo systemctl start watched.agent</pre>
  </div>
 </section>
 
-
 <section class="doc-section">
- <h2 class="section-title">Setup the database</h2>
+ <h2 class="section-title">The backend</h2>
  <div class="section-block">
-  <p>Create a user for watched and a database in your mysql server.</p>
-  <pre class="code"><span class="prompt">#</span> mysql -p</pre>
-  <pre><code class="language-sql">CREATE USER 'watched'@'localhost' IDENTIFIED BY 'watched';
-create database watcheddb;
-grant all privileges on watcheddb.* to watched@'%' identified by 'watched';
-grant all privileges on watched.* to watched@localhost identified by 'watched';</code></pre>
-<p>The username, password and database name provided here are an example, you're free to use anything you like instead.</p>
-<p>Now connect to the database as the user you just created :</p>
-  <pre class="code"><span class="prompt">$</span> mysql -u watched -D watcheddb -p</pre>
-  <pre><code class="language-sql">create table agents (
-	id 			int(32) unsigned auto_increment,
-	host 		varchar(256) not null, 
-	port 		int(32) unsigned not null,
-	pool_freq 	int(32) unsigned default 300,
-	central_id 	int(32) not null default 1,
-	domain_id	int(32),
-	constraint agent_pk primary key (id),
-	constraint unique index agent_u (host, port)
-);
-create table ressources (
-	id int(32)	unsigned auto_increment, 
-	name		varchar(256) not null,
-	type		varchar(256) not null,
-	constraint ressources_pk primary key (id), constraint unique index ressources_u (name)
-);
-create table agent_ressources(
-	agent_id	int(32) unsigned, 
-	res_id		int(32) unsigned, 
-	constraint agent_ressources_pk primary key (agent_id,res_id)
-);
-create table domains(
-	id			int(32) unsigned auto_increment,
-	name		varchar(256) not null,
-	constraint domaines_pk primary key (id)
-);
-
-create table event_types(
-	id			int(32) unsigned auto_increment, 
-	name		varchar(256) not null,
-	constraint event_types_pk primary key(id), constraint unique index event_types_u(name)
-);
-create table event_factory(
-	agent_id	int(32) unsigned,
-	res_id		int(32) unsigned,
-	res_type	varchar(256),
-	event_type 	int(32) unsigned not null,
-	property	varchar(256) not null,
-	oper		char not null,
-	value		double(20,4) not null
-);
-create table events(
-	id		int(32) unsigned auto_increment,
-	agent_id	int(32) unsigned not null,
-	res_id		int(32) unsigned not null,
-	start_time	double(20,4) unsigned not null,
-	end_time	double(20,4) unsigned,
-	event_type	int(32) unsigned not null,
-	property	varchar(256) not null,
-	current_value	double(20,4) not null,
-	oper		char not null,
-	value		double(20,4) not null,
-	constraint events_pk primary key(id)
-);
-
-create view live_tables as select distinct type as table_name from ressources;
-create view monitoring_items as
-select ar.*, r.name as res_name, r.type as res_type, ef.agent_id as factory_agent_id, ef.res_id as factory_res_id, ef.res_type as factory_res_type, ef.event_type, et.name as event_name, ef.property, ef.oper, ef.value
-  from ressources r, agent_ressources ar, event_factory ef, event_types et
- where ar.res_id=r.id
-   and ef.event_type = et.id
-   and (ef.agent_id =ar.agent_id or ef.agent_id is null) and (ef.res_id=ar.res_id or ef.res_id is null) and (ef.res_type=r.type or ef.res_type is null);
-
-
-insert into domains(name) values ("Production"),("Qualification"),("Testing"),("Developpement");
-insert into agents(host,port) values('localhost',9080);
-insert into event_types(name) values ("Critical"),("Error"),("Warning"),("Notice"),("Information");
-insert into event_factory(res_type, event_type, property, oper, value) values ('disk_usage', 3, 'pctfree', '<', 25),('disk_usage', 2, 'pctfree', '<', 5),('disk_usage', 2, 'ipctfree', '<', 5),('disk_usage', 3, 'ipctfree', '<', 25),('cpu_usage', 5, 'user', '>', 90);
-commit;</code></pre>
- </div>
-</section>
-
-
-<section class="doc-section">
- <h2 class="section-title">Build the backend</h2>
- <div class="section-block">
-  <p>if you havent already clone the repository :</p>
-  <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.back.git</pre>
-  <p>Install the dependencies:</p>
+  <h3>Install the dependencies</h3>
   <ul>
    <li><a href="https://tangentsoft.net/mysql++/">mysql++</a></li>
    <li><a href="https://www.openssl.org/">openssl</a></li>
@@ -150,17 +67,33 @@ commit;</code></pre>
   <pre class="code"><span class="prompt">#</span> yum install boost-devel jsoncpp-devel openssl-devel mysql++-devel</pre>
   <p>On a debian-based system :</p>
   <pre class="code"><span class="prompt">#</span> aptitude install libmysql++-dev libssl-dev libjsoncpp-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-system-dev libboost-thread-dev</pre>
+  <h3>Setup the database</h3>
+  <p>Create a user for watched and a database in your mysql server.</p>
+  <pre class="code"><span class="prompt">#</span> mysql -p</pre>
+  <pre><code class="language-sql">CREATE USER 'watched'@'localhost' IDENTIFIED BY 'watched';
+create database watcheddb;
+grant all privileges on watcheddb.* to watched@'%' identified by 'watched';
+grant all privileges on watched.* to watched@localhost identified by 'watched';</code></pre>
+<p>The username, password and database name provided here are an example, you're free to use anything you like instead.</p>
+  <p>if you havent already clone the repository :</p>
+  <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.back.git
+<span class="prompt">$</span> cd watched.back</pre>
+  <p>Now create the datamodel as the user you just created :</p>
+  <pre class="code"><span class="prompt">watched.back$</span> mysql -u watched -D watcheddb -p &lt;sql/schema.sql</pre>
+  <h3>Build the backend</h3>
   <p>then build using cmake :</p>
-  <pre class="code"><span class="prompt">$</span> cd watched.back
-<span class="prompt">watched.back$</span> mkdir build
+  <pre class="code"><span class="prompt">watched.back$</span> mkdir build
 <span class="prompt">watched.back$</span> cd build
 <span class="prompt">watched.back/build$</span> cmake ..
-<span class="prompt">watched.back/build$</span> make</pre>
-  <p>Then, start the backend :</p>
-  <pre class="code"><span class="prompt">watched.back/build$</span> ./watched.back</pre>
-  <p>The backend will probably fail to connect to the database, but it will have generated a default configuration file for you.</p>
-  <p>Edit the newly configuration file to setup database connection :</p>
-  <pre class="code"><span class="prompt">watched.back/build$</span> vi central.config.json</pre>
+<span class="prompt">watched.back/build$</span> make
+<span class="prompt">watched.back/build$</span> sudo su
+<span class="prompt">watched.back/build#</span> make install</pre>
+  <p>Alternatively, on Debian :</p>
+  <pre class="code"><span class="prompt">watched.back$</span> dpkg-buildpackage
+<span class="prompt">watched.back$</span> sudo su
+<span class="prompt">watched.back#</span> dpkg -i ../watched.back_*.deb</pre>
+  <p>Edit the configuration file to setup database connection :</p>
+  <pre class="code"><span class="prompt">watched.back/build#</span> vi /etc/watched/back.config.json</pre>
   <pre><code class="language-json">{
 ...
         "db" : 
@@ -173,17 +106,16 @@ commit;</code></pre>
         },
 ...
 }</code></pre>
-  <p>Finally, restart the backend :</p>
-  <pre class="code"><span class="prompt">watched.back/build$</span> ./watched.back</pre>
+  <p>Finally, start the backend :</p>
+  <pre class="code"><span class="prompt">watched.back/build#</span> systemctl start watched.back</pre>
  </div>
 </section>
 
+
 <section class="doc-section">
- <h2 class="section-title">Setup the frontend</h2>
+ <h2 class="section-title">The frontend</h2>
  <div class="section-block">
-  <p>if you havent already clone the repository :</p>
-  <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.front.git</pre>
-  <p>Get the initial dependency :</p>
+  <h3>Get the initial dependency</h3>
   <ul>
    <li><a href="https://getcomposer.org/">composer</a></li>
    </li>
@@ -192,9 +124,12 @@ commit;</code></pre>
   <pre class="code"><span class="prompt">#</span> yum install php composer</pre>
   <p>On a debian-based system :</p>
   <pre class="code"><span class="prompt">#</span> aptitude install composer</pre>
-  <p>Then get the other dependencies :</p>
-  <pre class="code"><span class="prompt">$</span> cd watched.front
+  <h3>Install the php packages</h3>
+  <p>if you havent already clone the repository :</p>
+  <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.front.git
+<span class="prompt">$</span> cd watched.front
 <span class="prompt">watched.front$</span> composer install</pre>
+  <h3>Configure</h3>
   <p>Edit the configuration file to setup the database :</p>
   <pre class="code"><span class="prompt">watched.front$</span> vi front.config.json</pre>
   <pre><code class="language-json">{
