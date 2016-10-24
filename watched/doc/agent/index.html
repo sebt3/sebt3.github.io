@@ -1,6 +1,6 @@
 ---
 layout: watched_docs
-breadcrumb: agent
+breadcrumb: Agent
 title: Watched Documentation
 doc_title: the agent
 doc_icon: fa-binoculars
@@ -32,7 +32,7 @@ doc_icon: fa-binoculars
  <h2 class="section-title">The configuration file</h2>
  <div class="section-block">
   <p></p>
-  <pre class="code"><span class="prompt">$</span> vi agent.config.json</pre>
+  <pre class="code"><span class="prompt">#</span> vi /etc/watched/agent.config.json</pre>
   <pre><code class="language-json">{
         /*      Configure the collectors plugins */
         "collectors" : 
@@ -100,6 +100,7 @@ doc_icon: fa-binoculars
                 "threads" : 8 /*                Number of concurrent threads use to reply on network interface */
         }
 }</code></pre>
-  <p>For now the agent doesnt check for changes in its configuration file, so after each edit you'll need to restart it.</p>
+  <p>For now the agent doesnt check for changes in its configuration file, so after each edit you'll need to restart it using :</p>
+  <pre class="code"><span class="prompt">#</span> systemctl restart watched.agent</pre>
  </div>
 </section>

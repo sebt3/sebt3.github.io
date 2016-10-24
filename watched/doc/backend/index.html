@@ -1,6 +1,6 @@
 ---
 layout: watched_docs
-breadcrumb: backend
+breadcrumb: Backend
 title: Watched Documentation
 doc_title: the backend
 doc_icon: fa-database
@@ -32,7 +32,7 @@ doc_icon: fa-database
  <h2 class="section-title">The configuration file</h2>
  <div class="section-block">
   <p></p>
-  <pre class="code"><span class="prompt">$</span> vi central.config.json</pre>
+  <pre class="code"><span class="prompt">#</span> vi /etc/watched/back.config.json</pre>
   <pre><code class="language-json">{
         /*      Configure the data aggregate process */
         "aggregate" : 
@@ -53,17 +53,19 @@ doc_icon: fa-database
                 "pool_size" : 32 /*                          Number of concurrent connections to the database */
         }
 }</code></pre>
-  <p>For now the backend doesnt check for changes in its configuration file, so after each edit you'll need to restart it.</p>
+  <p>For now the backend doesnt check for changes in its configuration file, so after each edit you'll need to restart it using :</p>
+  <pre class="code"><span class="prompt">#</span> systemctl restart watched.back</pre>
  </div>
 </section>
 
 <section class="doc-section">
- <h2 class="section-title">Configuring the agents</h2>
+ <h2 class="section-title">Adding agents</h2>
  <div class="section-block">
   <p>Until the frontend offer a better option, adding an agent is just a matter of inserting a line in the database.</p>
   <pre class="code"><span class="prompt">$</span> mysql -u watched -D watcheddb -p</pre>
   <pre><code class="language-sql">insert into agents(host,port) values('localhost',9080);
 commit;</code></pre>
-  <p>For now the backend doesnt check for changes in this table, so after each insert (or delete) you'll need to restart it.</p>
+  <p>For now the backend doesnt check for changes in this table, so after each insert (or delete) you'll need to restart it using :</p>
+  <pre class="code"><span class="prompt">#</span> systemctl restart watched.back</pre>
  </div>
 </section>
