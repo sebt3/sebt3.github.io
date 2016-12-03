@@ -73,7 +73,7 @@ doc_icon: fa-download
   <pre><code class="language-sql">CREATE USER 'watched'@'localhost' IDENTIFIED BY 'watched';
 create database watcheddb;
 grant all privileges on watcheddb.* to watched@'%' identified by 'watched';
-grant all privileges on watched.* to watched@localhost identified by 'watched';</code></pre>
+grant all privileges on watcheddb.* to watched@localhost identified by 'watched';</code></pre>
 <p>The username, password and database name provided here are an example, you're free to use anything you like instead.</p>
   <p>if you havent already clone the repository :</p>
   <pre class="code"><span class="prompt">$</span> git clone https://github.com/sebt3/watched.back.git

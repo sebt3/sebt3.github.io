@@ -1,0 +1,295 @@
+---
+layout: watched_docs
+breadcrumb: Secure backend
+title: Securing the backend
+doc_title: Securing the backend
+doc_icon: fa-lock
+---
+
+<section class="doc-section">
+ <h2 class="section-title">Introduction</h2>
+ <div class="section-block">
+  <h3>About</h3>
+  <p>This section discuss securing the link between the agents and the backend(s).</p>
+  <p>This document will be using the xca front-end to openssl to make things easy to do. You're free to use any other tools or even a distant CA as long as you get the requiered files.</p>
+  <h3>Why securing the backend</h3>
+  <p>The main point in securing the backend infrastructure is to authentify the backend on the agent. Once the agent allow the backend to push request and commands (planned feature) it will be mandatory to know if the requestor is actually allowed to run this command on the host. This feature will be only enabled using a secure connection.</p>
+  <p>This mean the quality and security of the signature is the most important thing. Obviously beside having your CA (or xca database) secured and out of reach of hackers.</p>
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Create the certificates DB</h2>
+ <div class="section-block">
+  <h3>Install xca</h3>
+  <ul>
+   <li><a href="http://xca.sourceforge.net/">X certificate and key management</a></li>
+  </ul>
+  <p>On a debian-based system :</p>
+  <pre class="code"><span class="prompt">#</span> aptitude install xca</pre>
+  <h3>Create the initial database</h3>
+  <p>Start xca :</p>
+  <pre class="code"><span class="prompt">$</span> xca</pre>
+  <img class="img-responsive center-block" src="/watched/screens/xca_startup.png">
+  <p>Click on "File" &gt; "New"</p>
+  <p>Select a previously secured directory (chmod 0700) and give a name to the file</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_password.png">
+  <p>Use a strong passphase, you dont want someone else accessing this file.</p>
+  <h3>Generate the root certificate</h3>
+  <p>Click on the "New Certificate" button :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_newcert.png">
+  <ol>
+   <li>Change the certificate serial to a truely random number</li>
+   <li>Choose SHA 256 as signature algorithm (at bare minimum)</li>
+   <li>Click on the "Apply extentions" button</li>
+   <li>Select the "Subject" Tab</li>
+  </ol>
+  <img class="img-responsive center-block" src="/watched/screens/xca_rootsubject.png">
+  <ol start=5>
+   <li>Set the commonName to "Watched root CA" (requiered)</li>
+   <li>Set the other fields (optionnal)</li>
+   <li>Click on the "Generate a new key" button</li>
+   <li>Click on the "Create" button (accepting the default values)</li>
+   <li>Optionnal : in the Extensions tab, select a different time range</li>
+   <li>Finally click on the "OK" button</li>
+  </ol>
+  <h3>Generate the agent authority</h3>
+  <p>Click on the "New Certificate" button :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_newcert2.png">
+  <ol>
+   <li>Select "Use this Certificate for signing"</li>
+   <li>Select the previously created root certificate in the dropdown</li>
+   <li>Choose SHA 256 as signature algorithm (at bare minimum)</li>
+   <li>Click on the "Apply extentions" button</li>
+   <li>Select the "Subject" Tab</li>
+   <li>Set the commonName to "Watched agent CA" (requiered)</li>
+   <li>Set the other fields (optionnal)</li>
+   <li>Click on the "Generate a new key" button</li>
+   <li>Click on the "Create" button (accepting the default values)</li>
+   <li>Optionnal : in the Extensions tab, select a different time range</li>
+   <li>Finally click on the "OK" button</li>
+   <li>Click on the "Adjust date and continue" button (if asked)</li>
+  </ol>
+  <h3>Generate the backend authority</h3>
+  <p>Same as the agent authority giving it an adapted commonName</p>
+  <p>Click on the "New Certificate" button :</p>
+  <ol>
+   <li>Select "Use this Certificate for signing"</li>
+   <li>Select the previously created root certificate in the dropdown</li>
+   <li>Choose SHA 256 as signature algorithm (at bare minimum)</li>
+   <li>Click on the "Apply extentions" button</li>
+   <li>Select the "Subject" Tab</li>
+   <li>Set the commonName to "Watched backend CA" (requiered)</li>
+   <li>Set the other fields (optionnal)</li>
+   <li>Click on the "Generate a new key" button</li>
+   <li>Click on the "Create" button (accepting the default values)</li>
+   <li>Optionnal : in the Extensions tab, select a different time range</li>
+   <li>Finally click on the "OK" button</li>
+   <li>Click on the "Adjust date and continue" button (if asked)</li>
+  </ol>
+  <p>At this point you should have the following certificates available in the database :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_ca.png">
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Create the backend key and certificate</h2>
+ <div class="section-block">
+  <p>The following section has to be done for all the backend you're using</p>
+  <h3>Create the certificat</h3>
+  <p>Select the "backend CA" and click on the "New Certificate" button :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_newcert3.png">
+  <ol>
+   <li>Make sure the "Watched backend CA" is selected to sign this new certificate</li>
+   <li>Choose SHA 256 as signature algorithm (at bare minimum)</li>
+   <li>Select the HTTPS_client template</li>
+   <li>Click on the "Apply extentions" button</li>
+   <li>Select the "Subject" Tab</li>
+   <li>Set the commonName to identify your backend like "Watched domain 1 backend" (requiered)</li>
+   <li>Set the other fields (optionnal)</li>
+   <li>Click on the "Generate a new key" button</li>
+   <li>Click on the "Create" button (accepting the default values)</li>
+   <li>In the Extensions tab, set the time rnge to a longer period (up to 10 years)</li>
+   <li>Finally click on the "OK" button</li>
+  </ol>
+  <h3>export the requiered files</h3>
+  <p>Select your newly created backend certificate :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_ca_back.png">
+  <p>Click the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_exppem_back.png">
+  <ol>
+   <li>Select "PEM chain (*.pem)" as Export Format</li>
+   <li>Rename the file to "backend.pem"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <p>Select the "Watched agent CA" certificate and click the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_exppem_backvrf.png">
+  <ol>
+   <li>Select "PEM chain (*.pem)" as Export Format</li>
+   <li>Rename the file to "backend.verify.pem"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <p>Select the "Private Keys" tab</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_pk_back.png">
+  <p>Select the key for your backend and click on the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_pk_back_exp.png">
+  <ol>
+   <li>Rename the file to "backend.key"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <h3>Install</h3>
+  <p>Copy the 3 generated files to /etc/watched/ssl on the backend node</p>
+  <p>Make sure the permissions are correct on this directory :</p>
+  <pre class="code"><span class="prompt">#</span> chown -R root:root /etc/watched/ssl
+<span class="prompt">#</span> chmod 0700 /etc/watched/ssl
+<span class="prompt">#</span> chmod 0600 /etc/watched/ssl/*</pre>
+  <p>Edit the configuration file to update the location of the files :</p>
+  <pre class="code"><span class="prompt">#</span> vi /etc/watched/back.config.json</pre>
+  <pre><code class="language-json">{
+...
+	"backend" : 
+	{
+		"SSL_cert" : "/etc/watched/ssl/backend.pem", /*			SSL certificate file for the backend */
+		"SSL_key" : "/etc/watched/ssl/backend.key", /*			SSL backend private key file */
+		"SSL_verify" : "/etc/watched/ssl/backend.verify.pem" /*	SSL certificate file containing the agents keychain */
+        },
+...
+}</code></pre>
+  <p>Restart the backend :</p>
+  <pre class="code"><span class="prompt">#</span> systemctl restart watched.back</pre>
+  <p>From now on, your backend is able to handle agents using SSL</p>
+  <p>NB: delete every other copy of the "backend.key" file</p>
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Migrate an agent to SSL</h2>
+ <div class="section-block">
+  <h3>Create the certificate</h3>
+  <img class="img-responsive center-block" src="/watched/screens/xca_newcert4.png">
+  <p>Select the "agent CA" and click on the "New Certificate" button :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_newcert5.png">
+  <ol>
+   <li>Make sure the "Watched agent CA" is selected to sign this new certificate</li>
+   <li>Choose SHA 256 as signature algorithm (at bare minimum)</li>
+   <li>Select the HTTPS_server template</li>
+   <li>Click on the "Apply extentions" button</li>
+   <li>Select the "Subject" Tab</li>
+   <li>Set the commonName to the DNS agent name (the host field in the agent table in the database must match this)</li>
+   <li>Set the other fields (optionnal)</li>
+   <li>Click on the "Generate a new key" button</li>
+   <li>Click on the "Create" button (accepting the default values)</li>
+   <li>In the Extensions tab, set the time rnge to a longer period (up to 10 years)</li>
+  </ol>
+  <img class="img-responsive center-block" src="/watched/screens/xca_agentsubject.png">
+  <p>Finally click on the "OK" button</p>
+  <h3>export the requiered files</h3>
+  <p>Select your newly created agent certificate :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_ca_agent.png">
+  <p>Click the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_exppem_agent.png">
+  <ol>
+   <li>Select "PEM chain (*.pem)" as Export Format</li>
+   <li>Rename the file to "agent.pem"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <p>Select the "Watched backend CA" certificate and click the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_exppem_agentvrf.png">
+  <ol>
+   <li>Select "PEM chain (*.pem)" as Export Format</li>
+   <li>Rename the file to "agent.verify.pem"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <p>Select the "Private Keys" tab</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_pk_agent.png">
+  <p>Select the key for your backend and click on the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_pk_agent_exp.png">
+  <ol>
+   <li>Rename the file to "agent.key"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <h3>Install</h3>
+  <p>Copy the 3 generated files to /etc/watched/ssl on the agent node</p>
+  <p>Make sure the permissions are correct on this directory :</p>
+  <pre class="code"><span class="prompt">#</span> chown -R root:root /etc/watched/ssl
+<span class="prompt">#</span> chmod 0700 /etc/watched/ssl
+<span class="prompt">#</span> chmod 0600 /etc/watched/ssl/*</pre>
+  <p>Edit the configuration file to update the location of the files :</p>
+  <pre class="code"><span class="prompt">#</span> vi /etc/watched/agent.config.json</pre>
+  <pre><code class="language-json">{
+...
+        "server" : 
+        {
+		"SSL_cert" : "/etc/watched/ssl/agent.pem", /*			SSL certificate file for the agent */
+		"SSL_key" : "/etc/watched/ssl/agent.key", /*			SSL private key file */
+		"SSL_verify" : "/etc/watched/ssl/agent.verify.pem" /*	SSL certificate file containing the backend keychain */
+...
+        },
+...
+}</code></pre>
+  <h3>Update the database</h3>
+  <p>Until the frontend offer a better option, this is just an update command in the database.</p>
+  <pre class="code"><span class="prompt">$</span> mysql -u watched -D watcheddb -p</pre>
+  <pre><code class="language-sql">update agents set use_ssl=1 where host='msiseb.chez.nous';
+commit;</code></pre>
+
+  <h3>Restart the agent</h3>
+  <p>As root on the agent node :</p>
+  <pre class="code"><span class="prompt">#</span> systemctl restart watched.back</pre>
+  <h3>Restart the backend</h3>
+  <p>As root on the backend node :</p>
+  <pre class="code"><span class="prompt">#</span> systemctl restart watched.back</pre>
+ </div>
+</section>
+
+<section class="doc-section">
+ <h2 class="section-title">Consuming an SSL agent data from your browser</h2>
+ <div class="section-block">
+  <h3>Create the certificate</h3>
+  <p>Follow the procedure to create a backend certificate :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_newcert3.png">
+  <ol>
+   <li>Make sure the "Watched backend CA" is selected to sign this new certificate</li>
+   <li>Choose SHA 256 as signature algorithm (at bare minimum)</li>
+   <li>Select the HTTPS_client template</li>
+   <li>Click on the "Apply extentions" button</li>
+   <li>Select the "Subject" Tab</li>
+   <li>Set the commonName to identify the user like "Firstname Lastname" (requiered)</li>
+   <li>Set the emailAddress (recommanded)</li>
+   <li>Set the other fields (optionnal)</li>
+   <li>Click on the "Generate a new key" button</li>
+   <li>Click on the "Create" button (accepting the default values)</li>
+   <li>In the Extensions tab, set the time rnge to a longer period (up to 10 years)</li>
+   <li>Finally click on the "OK" button</li>
+  </ol>
+  <h3>export the requiered files</h3>
+  <p>Select your newly created user certificate and click the "Export" button :</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_expp12.png">
+  <ol>
+   <li>Select "PPKCS #12 (*.p12)" as Export Format</li>
+   <li>Click "OK"</li>
+  </ol>
+  <p>Select the "Watched agent CA" certificate and click the "Export" button</p>
+  <img class="img-responsive center-block" src="/watched/screens/xca_exppem_backvrf.png">
+  <ol>
+   <li>Select "PEM chain (*.pem)" as Export Format</li>
+   <li>Rename the file to "backend.verify.pem"</li>
+   <li>Click "OK"</li>
+  </ol>
+  <h3>Install</h3>
+  <p>In this section, on chrome browser is documented. Firefox and Edge browser have similar options.</p>
+  <p> In the chrome setting page, lookup "ssl" :</p>
+  <img class="img-responsive center-block" src="/watched/screens/chrome_settings.png">
+  <ul><li>Click on the "Manage certificate" button</li></ul>
+  <img class="img-responsive center-block" src="/watched/screens/chrome_settings_ca.png">
+  <ul><li>Select the "Authority" tab</li>
+  <li>Click on the "Import" button</li>
+  <li>Select the "backend.verify.pem" file saved earlier and confirm</li>
+  <li>Now select the "Your certificate" tab</li>
+  <li>Click on the "Import" button</li>
+  <li>Select the "*.p12" file saved earlier and confirm</li></ul>
+  <p>Now you can direct your browser to your agent URL safely</p>
+
+ </div>
+</section>
+
